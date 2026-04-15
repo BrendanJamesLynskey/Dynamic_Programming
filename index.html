@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dynamic Programming</title>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/theme/black.min.css">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+  :root {
+    --amber:  #f5a623;
+    --green:  #4ecb8d;
+    --purple: #a78bfa;
+    --blue:   #60a5fa;
+    --red:    #f87171;
+    --bg:     #0a0a0f;
+    --bg2:    #10101a;
+    --bg3:    #181824;
+    --border: #2a2a3a;
+    --text:   #e8e8f0;
+    --muted:  #8888a8;
+  }
+
+  .reveal-viewport { background: var(--bg); }
+  .reveal .slides section { background: transparent; }
+
+  .reveal { font-family: 'DM Sans', sans-serif; color: var(--text); }
+  .reveal h1, .reveal h2, .reveal h3 { font-family: 'Playfair Display', serif; font-weight: 700; }
+  .reveal h1 { font-size: 1.6em; color: var(--amber); line-height: 1.1; }
+  .reveal h2 { font-size: 1.1em; color: var(--amber); margin-bottom: .2em; }
+  .reveal h3 { font-size: .78em; color: var(--green); margin-bottom: .15em; }
+  .reveal p  { font-size: .56em; line-height: 1.45; color: var(--text); }
+  .reveal li { font-size: .54em; line-height: 1.45; margin-bottom: .1em; }
+  .reveal code { font-family: 'JetBrains Mono', monospace; font-size: .72em; }
+  .reveal pre  { box-shadow: none; background: var(--bg3); border: 1px solid var(--border);
+                 border-radius: 6px; padding: .3em .5em; margin: .25em 0; }
+  .reveal pre code { font-size: .52em; line-height: 1.35; background: transparent; color: #cdd6f4; }
+
+  /* ── slide chrome ── */
+  .slide-hdr {
+    display: flex; align-items: center; gap: .4em;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: .2em; margin-bottom: .3em;
+  }
+  .slide-hdr .tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: .42em; font-weight: 500;
+    color: var(--bg); background: var(--amber);
+    padding: .1em .4em; border-radius: 3px;
+    letter-spacing: .04em;
+  }
+  .slide-hdr h2 { margin: 0; font-size: .95em; }
+
+  /* ── two-column ── */
+  .cols   { display: grid; gap: .5em; }
+  .cols-2 { grid-template-columns: 1fr 1fr; }
+  .cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .cols-6040 { grid-template-columns: 6fr 4fr; }
+  .cols-4060 { grid-template-columns: 4fr 6fr; }
+
+  /* ── cards ── */
+  .card {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 6px; padding: .35em .6em;
+  }
+  .card.amber { border-left: 3px solid var(--amber); }
+  .card.green { border-left: 3px solid var(--green); }
+  .card.purple{ border-left: 3px solid var(--purple); }
+  .card.blue  { border-left: 3px solid var(--blue); }
+  .card.red   { border-left: 3px solid var(--red); }
+  .card h3 { font-size: .64em; margin: 0 0 .12em; }
+  .card p  { font-size: .52em; margin: 0; color: #b8b8d0; }
+  .card ul { margin: 0; padding-left: 1em; }
+  .card li { font-size: .52em; color: #b8b8d0; margin-bottom: .02em; }
+
+  /* ── table ── */
+  .reveal table { width: 100%; border-collapse: collapse; font-size: .5em; }
+  .reveal table th { background: var(--bg3); color: var(--amber); font-weight: 600;
+                     padding: .2em .4em; border: 1px solid var(--border); text-align: left; }
+  .reveal table td { padding: .18em .4em; border: 1px solid var(--border); color: #ccc; }
+  .reveal table tr:nth-child(even) td { background: #0e0e18; }
+
+  /* ── accent spans ── */
+  .a  { color: var(--amber); font-weight: 600; }
+  .g  { color: var(--green); font-weight: 600; }
+  .p  { color: var(--purple); font-weight: 600; }
+  .b  { color: var(--blue); font-weight: 600; }
+  .r  { color: var(--red); font-weight: 600; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* ── SVG graph diagrams ── */
+  svg.diagram { display: block; margin: 0 auto; overflow: visible; }
+
+  /* ── pill badges ── */
+  .pill {
+    display: inline-block; font-family: 'JetBrains Mono', monospace;
+    font-size: .44em; padding: .08em .4em; border-radius: 99px;
+    border: 1px solid; margin: 0 .08em;
+  }
+  .pill.amber { color: var(--amber); border-color: var(--amber); }
+  .pill.green { color: var(--green); border-color: var(--green); }
+  .pill.purple{ color: var(--purple); border-color: var(--purple); }
+  .pill.blue  { color: var(--blue); border-color: var(--blue); }
+
+  /* ── footer — hidden ── */
+  .reveal .slide-footer { display: none; }
+  /* title slide special */
+  .title-slide h1 { font-size: 1.8em; }
+  .title-slide .subtitle {
+    font-size: .7em; color: var(--green); font-family: 'DM Sans', sans-serif;
+    font-weight: 300; letter-spacing: .04em; margin: .3em 0 .6em;
+  }
+  .title-slide .meta { font-size: .48em; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
+
+  /* ── super-step animator ── */
+  .ss-row {
+    display: flex; gap: .25em; align-items: center;
+    margin: .1em 0; font-size: .55em; font-family: 'JetBrains Mono', monospace;
+  }
+  .ss-node {
+    padding: .2em .55em; border-radius: 5px; font-size: .9em;
+    background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+  }
+  .ss-node.active { background: #1a2a1a; border-color: var(--green); color: var(--green); }
+  .ss-node.done   { background: #1a1a2a; border-color: var(--purple); color: var(--purple); }
+  .ss-arrow { color: var(--amber); }
+  .ss-label { font-size: .8em; color: var(--muted); margin-left: .3em; }
+
+  /* reduce default margins */
+  .reveal ul, .reveal ol { margin: .15em 0 .15em 1em; }
+.reveal .slides > section { display: flex !important; flex-direction: column !important; overflow-y: auto !important; align-items: stretch !important; justify-content: flex-start !important; }
+</style>
+</head>
+<body>
+<div class="reveal">
+<div class="slides">
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 01 — Title
+══════════════════════════════════════════════════════════════════ -->
+<section class="title-slide" data-background-color="#0a0a0f">
+  <div style="font-family:'JetBrains Mono',monospace; font-size:.5em; color:var(--muted); margin-bottom:.4em; letter-spacing:.1em;">COMPUTER SCIENCE FUNDAMENTALS SERIES</div>
+  <h1>Dynamic<br>Programming</h1>
+  <div class="subtitle">
+    Optimal substructure · Memoization · Tabulation ·<br>
+    Knapsack · Edit distance · State transitions
+  </div>
+  <div style="width:60px; height:3px; background:var(--amber); margin-bottom:1.4em;"></div>
+  <div class="meta">
+    Mid-level software engineer track &nbsp;·&nbsp; 20 slides
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 02 — What Is Dynamic Programming?
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">02</span>
+    <h2>What Is Dynamic Programming?</h2>
+  </div>
+  <p>Dynamic programming (DP) is an algorithmic paradigm that solves complex problems by breaking them into simpler overlapping subproblems, solving each once, and storing the result for reuse.</p>
+  <div class="cols cols-2" style="margin-top:.4em">
+    <div class="card amber">
+      <h3>Optimal Substructure</h3>
+      <p>An optimal solution to the problem contains optimal solutions to its subproblems. If you can express the answer in terms of answers to smaller instances of the same problem, the structure is present.</p>
+      <p style="margin-top:.4em; color:var(--amber)">Example: shortest path from A to C via B = shortest(A→B) + shortest(B→C)</p>
+    </div>
+    <div class="card green">
+      <h3>Overlapping Subproblems</h3>
+      <p>The same subproblem is encountered many times during recursion. Naive recursion recomputes them exponentially; DP computes each exactly once.</p>
+      <p style="margin-top:.4em; color:var(--green)">Example: fib(5) calls fib(3) twice, fib(2) three times</p>
+    </div>
+  </div>
+  <div class="card blue" style="margin-top:.5em">
+    <p><strong style="color:var(--blue)">When both properties hold</strong> — optimal substructure and overlapping subproblems — dynamic programming applies. Without overlap, divide-and-conquer suffices. Without optimal substructure, greedy or DP will not yield correct results.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 03 — Memoization vs Tabulation
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">03</span>
+    <h2>Memoization vs Tabulation</h2>
+  </div>
+  <div class="cols cols-2">
+    <div class="card amber">
+      <h3>Top-Down (Memoization)</h3>
+      <ul>
+        <li>Start from the original problem, recurse into subproblems</li>
+        <li>Cache results in a hash map or array on first computation</li>
+        <li>Return cached value on subsequent calls</li>
+        <li>Only solves subproblems that are actually needed</li>
+        <li>Uses the call stack — risk of stack overflow for deep recursion</li>
+      </ul>
+<pre><code class="python">memo = {}
+def fib(n):
+    if n <= 1: return n
+    if n in memo: return memo[n]
+    memo[n] = fib(n-1) + fib(n-2)
+    return memo[n]</code></pre>
+    </div>
+    <div class="card green">
+      <h3>Bottom-Up (Tabulation)</h3>
+      <ul>
+        <li>Start from the smallest subproblems, build up iteratively</li>
+        <li>Fill a table (array) in a defined order</li>
+        <li>No recursion — no stack overflow risk</li>
+        <li>Solves all subproblems, even those not strictly needed</li>
+        <li>Often enables space optimisation (rolling arrays)</li>
+      </ul>
+<pre><code class="python">def fib(n):
+    if n <= 1: return n
+    dp = [0] * (n + 1)
+    dp[1] = 1
+    for i in range(2, n + 1):
+        dp[i] = dp[i-1] + dp[i-2]
+    return dp[n]</code></pre>
+    </div>
+  </div>
+  <div class="card purple" style="margin-top:.5em">
+    <p><strong style="color:var(--purple)">Rule of thumb:</strong> use top-down when the state space is sparse or hard to enumerate; use bottom-up when you need every subproblem and want to optimise space.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 04 — Fibonacci: The Introductory Example
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">04</span>
+    <h2>Fibonacci: The Introductory Example</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Naive recursion — O(2<sup>n</sup>)</h3>
+      <p>The recursion tree explodes exponentially. <code>fib(40)</code> makes over one billion calls.</p>
+<pre><code class="python">def fib(n):
+    if n <= 1: return n
+    return fib(n-1) + fib(n-2)</code></pre>
+      <h3 style="margin-top:.4em">Call tree for fib(5)</h3>
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:6px; padding:.5em;">
+        <svg viewBox="0 0 340 170" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto">
+          <text x="170" y="18" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#f5a623">fib(5)</text>
+          <line x1="155" y1="22" x2="90" y2="42" stroke="#2a2a3a"/>
+          <line x1="185" y1="22" x2="250" y2="42" stroke="#2a2a3a"/>
+          <text x="80" y="54" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#4ecb8d">fib(4)</text>
+          <text x="260" y="54" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#f87171">fib(3)</text>
+          <line x1="65" y1="58" x2="30" y2="78" stroke="#2a2a3a"/>
+          <line x1="95" y1="58" x2="130" y2="78" stroke="#2a2a3a"/>
+          <text x="25" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#f87171">fib(3)</text>
+          <text x="138" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#a78bfa">fib(2)</text>
+          <line x1="245" y1="58" x2="220" y2="78" stroke="#2a2a3a"/>
+          <line x1="275" y1="58" x2="300" y2="78" stroke="#2a2a3a"/>
+          <text x="215" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#a78bfa">fib(2)</text>
+          <text x="305" y="90" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" fill="#60a5fa">fib(1)</text>
+          <line x1="10" y1="94" x2="0" y2="114" stroke="#2a2a3a"/>
+          <line x1="40" y1="94" x2="55" y2="114" stroke="#2a2a3a"/>
+          <text x="0" y="126" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#a78bfa">fib(2)</text>
+          <text x="60" y="126" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60a5fa">fib(1)</text>
+          <text x="170" y="160" text-anchor="middle" font-family="'DM Sans',sans-serif" font-size="10" fill="#f87171">Red nodes = duplicated subproblems</text>
+        </svg>
+      </div>
+    </div>
+    <div>
+      <h3>DP approach — O(n)</h3>
+      <table>
+        <tr><th>Approach</th><th>Time</th><th>Space</th></tr>
+        <tr><td>Naive recursion</td><td><code>O(2<sup>n</sup>)</code></td><td><code>O(n)</code> stack</td></tr>
+        <tr><td>Memoization</td><td><code>O(n)</code></td><td><code>O(n)</code></td></tr>
+        <tr><td>Tabulation</td><td><code>O(n)</code></td><td><code>O(n)</code></td></tr>
+        <tr><td>Space-optimised</td><td><code>O(n)</code></td><td><code>O(1)</code></td></tr>
+      </table>
+      <h3 style="margin-top:.5em">Space-optimised solution</h3>
+<pre><code class="python">def fib(n):
+    if n <= 1: return n
+    prev2, prev1 = 0, 1
+    for _ in range(2, n + 1):
+        prev2, prev1 = prev1, prev2 + prev1
+    return prev1</code></pre>
+      <div class="card amber" style="margin-top:.4em">
+        <p><strong style="color:var(--amber)">Key insight:</strong> we only ever need the last two values — no need to store the entire table. This pattern generalises to many 1D DP problems.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 05 — The DP Recipe
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">05</span>
+    <h2>The DP Recipe</h2>
+  </div>
+  <p>A systematic approach to solving any DP problem:</p>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div>
+      <div style="display:flex; flex-direction:column; gap:.3em;">
+        <div style="display:flex; align-items:flex-start; gap:.5em; background:var(--bg3); border-radius:6px; padding:.35em .6em; font-size:.52em; border:1px solid var(--border);">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4em; font-weight:700; min-width:0.9em; line-height:1; color:var(--amber)">1</span>
+          <span style="color:var(--text); line-height:1.5"><strong style="color:var(--amber)">Define the state</strong> — what variables uniquely describe a subproblem? <code>dp[i]</code>, <code>dp[i][j]</code>, <code>dp[mask]</code></span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:.5em; background:var(--bg3); border-radius:6px; padding:.35em .6em; font-size:.52em; border:1px solid var(--border);">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4em; font-weight:700; min-width:0.9em; line-height:1; color:var(--green)">2</span>
+          <span style="color:var(--text); line-height:1.5"><strong style="color:var(--green)">Write the recurrence</strong> — express <code>dp[state]</code> in terms of smaller states. This is the transition function.</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:.5em; background:var(--bg3); border-radius:6px; padding:.35em .6em; font-size:.52em; border:1px solid var(--border);">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4em; font-weight:700; min-width:0.9em; line-height:1; color:var(--purple)">3</span>
+          <span style="color:var(--text); line-height:1.5"><strong style="color:var(--purple)">Identify base cases</strong> — the smallest subproblems with known answers. <code>dp[0] = 0</code>, <code>dp[0][0] = 1</code>, etc.</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:.5em; background:var(--bg3); border-radius:6px; padding:.35em .6em; font-size:.52em; border:1px solid var(--border);">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4em; font-weight:700; min-width:0.9em; line-height:1; color:var(--blue)">4</span>
+          <span style="color:var(--text); line-height:1.5"><strong style="color:var(--blue)">Determine iteration order</strong> — ensure all dependencies are computed before the current state.</span>
+        </div>
+        <div style="display:flex; align-items:flex-start; gap:.5em; background:var(--bg3); border-radius:6px; padding:.35em .6em; font-size:.52em; border:1px solid var(--border);">
+          <span style="font-family:'Playfair Display',serif; font-size:1.4em; font-weight:700; min-width:0.9em; line-height:1; color:var(--red)">5</span>
+          <span style="color:var(--text); line-height:1.5"><strong style="color:var(--red)">Extract the answer</strong> — locate the final state: <code>dp[n]</code>, <code>max(dp)</code>, or backtrack for the solution path.</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <h3>Example: Climbing Stairs</h3>
+      <p>You can climb 1 or 2 steps at a time. How many distinct ways to reach step <code>n</code>?</p>
+<pre><code class="python"># State: dp[i] = ways to reach step i
+# Recurrence: dp[i] = dp[i-1] + dp[i-2]
+# Base: dp[0] = 1, dp[1] = 1
+# Order: left to right
+# Answer: dp[n]
+
+def climb_stairs(n):
+    if n <= 1: return 1
+    prev2, prev1 = 1, 1
+    for i in range(2, n + 1):
+        prev2, prev1 = prev1, prev2 + prev1
+    return prev1</code></pre>
+      <div class="card green" style="margin-top:.3em">
+        <p><strong style="color:var(--green)">Notice:</strong> this is exactly the Fibonacci sequence shifted by one index. Many 1D DP problems reduce to similar linear recurrences.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 06 — 1D DP: Coin Change
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">06</span>
+    <h2>1D DP: Coin Change</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <p>Given coins of denominations <code>coins[]</code> and a target amount, find the minimum number of coins needed.</p>
+      <h3>Recurrence</h3>
+<pre><code class="python">dp[0] = 0  # base case
+dp[amount] = min(dp[amount - coin] + 1)
+             for coin in coins
+             if amount - coin >= 0</code></pre>
+      <h3 style="margin-top:.3em">Full solution</h3>
+<pre><code class="python">def coin_change(coins, amount):
+    dp = [float('inf')] * (amount + 1)
+    dp[0] = 0
+    for a in range(1, amount + 1):
+        for c in coins:
+            if c <= a:
+                dp[a] = min(dp[a], dp[a - c] + 1)
+    return dp[amount] if dp[amount] != float('inf') else -1</code></pre>
+    </div>
+    <div>
+      <h3>Trace: coins = [1, 3, 4], amount = 6</h3>
+      <table>
+        <tr><th>amount</th><th>dp[amount]</th><th>best coin</th></tr>
+        <tr><td>0</td><td>0</td><td>—</td></tr>
+        <tr><td>1</td><td>1</td><td>1</td></tr>
+        <tr><td>2</td><td>2</td><td>1</td></tr>
+        <tr><td>3</td><td>1</td><td>3</td></tr>
+        <tr><td>4</td><td>1</td><td>4</td></tr>
+        <tr><td>5</td><td>2</td><td>1+4</td></tr>
+        <tr><td>6</td><td>2</td><td>3+3</td></tr>
+      </table>
+      <div class="card amber" style="margin-top:.4em">
+        <p><strong style="color:var(--amber)">Complexity:</strong> Time <code>O(amount * |coins|)</code>, Space <code>O(amount)</code>. Greedy fails here — greedy picks 4+1+1 = 3 coins, but DP finds 3+3 = 2 coins.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 07 — 1D DP: Longest Increasing Subsequence
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">07</span>
+    <h2>1D DP: Longest Increasing Subsequence</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <p>Given an array <code>nums[]</code>, find the length of the longest strictly increasing subsequence (LIS).</p>
+      <h3>O(n<sup>2</sup>) DP approach</h3>
+<pre><code class="python"># State: dp[i] = length of LIS ending at index i
+# Recurrence: dp[i] = max(dp[j] + 1)
+#             for all j < i where nums[j] < nums[i]
+# Base: dp[i] = 1 for all i
+
+def lis(nums):
+    n = len(nums)
+    dp = [1] * n
+    for i in range(1, n):
+        for j in range(i):
+            if nums[j] < nums[i]:
+                dp[i] = max(dp[i], dp[j] + 1)
+    return max(dp)</code></pre>
+    </div>
+    <div>
+      <h3>O(n log n) with patience sorting</h3>
+<pre><code class="python">import bisect
+
+def lis_fast(nums):
+    tails = []  # tails[i] = smallest tail of
+                # all increasing subseqs of length i+1
+    for x in nums:
+        pos = bisect.bisect_left(tails, x)
+        if pos == len(tails):
+            tails.append(x)
+        else:
+            tails[pos] = x
+    return len(tails)</code></pre>
+      <h3 style="margin-top:.3em">Trace: [10, 9, 2, 5, 3, 7, 101, 18]</h3>
+      <table>
+        <tr><th>Step</th><th>tails</th><th>LIS length</th></tr>
+        <tr><td>10</td><td>[10]</td><td>1</td></tr>
+        <tr><td>9</td><td>[9]</td><td>1</td></tr>
+        <tr><td>2</td><td>[2]</td><td>1</td></tr>
+        <tr><td>5</td><td>[2, 5]</td><td>2</td></tr>
+        <tr><td>3</td><td>[2, 3]</td><td>2</td></tr>
+        <tr><td>7</td><td>[2, 3, 7]</td><td>3</td></tr>
+        <tr><td>101</td><td>[2, 3, 7, 101]</td><td>4</td></tr>
+        <tr><td>18</td><td>[2, 3, 7, 18]</td><td>4</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 08 — 2D DP: Edit Distance
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">08</span>
+    <h2>2D DP: Edit Distance (Levenshtein)</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <p>Minimum insertions, deletions, and substitutions to transform string <code>a</code> into string <code>b</code>.</p>
+      <h3>Recurrence</h3>
+<pre><code class="python"># State: dp[i][j] = edit distance between
+#        a[0..i-1] and b[0..j-1]
+
+if a[i-1] == b[j-1]:
+    dp[i][j] = dp[i-1][j-1]       # match
+else:
+    dp[i][j] = 1 + min(
+        dp[i-1][j],     # delete from a
+        dp[i][j-1],     # insert into a
+        dp[i-1][j-1]    # substitute
+    )</code></pre>
+      <h3 style="margin-top:.3em">Full solution</h3>
+<pre><code class="python">def edit_distance(a, b):
+    m, n = len(a), len(b)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(m+1): dp[i][0] = i
+    for j in range(n+1): dp[0][j] = j
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i-1][j],
+                    dp[i][j-1], dp[i-1][j-1])
+    return dp[m][n]</code></pre>
+    </div>
+    <div>
+      <h3>DP table: "kitten" → "sitting"</h3>
+      <table>
+        <tr><th></th><th></th><th>s</th><th>i</th><th>t</th><th>t</th><th>i</th><th>n</th><th>g</th></tr>
+        <tr><td></td><td><strong>0</strong></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+        <tr><td><strong>k</strong></td><td>1</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+        <tr><td><strong>i</strong></td><td>2</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+        <tr><td><strong>t</strong></td><td>3</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+        <tr><td><strong>t</strong></td><td>4</td><td>4</td><td>3</td><td>2</td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+        <tr><td><strong>e</strong></td><td>5</td><td>5</td><td>4</td><td>3</td><td>2</td><td>2</td><td>3</td><td>4</td></tr>
+        <tr><td><strong>n</strong></td><td>6</td><td>6</td><td>5</td><td>4</td><td>3</td><td>3</td><td>2</td><td>3</td></tr>
+      </table>
+      <div class="card purple" style="margin-top:.4em">
+        <p><strong style="color:var(--purple)">Answer: 3</strong> — substitute k→s, substitute e→i, insert g. Time <code>O(mn)</code>, Space <code>O(mn)</code> reducible to <code>O(min(m,n))</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 09 — 2D DP: Longest Common Subsequence
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">09</span>
+    <h2>2D DP: Longest Common Subsequence</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <p>Find the length of the longest subsequence common to two strings <code>a</code> and <code>b</code>. Characters need not be contiguous but must preserve order.</p>
+      <h3>Recurrence</h3>
+<pre><code class="python"># State: dp[i][j] = LCS length of a[0..i-1], b[0..j-1]
+
+if a[i-1] == b[j-1]:
+    dp[i][j] = dp[i-1][j-1] + 1
+else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])</code></pre>
+      <h3 style="margin-top:.3em">Solution</h3>
+<pre><code class="python">def lcs(a, b):
+    m, n = len(a), len(b)
+    dp = [[0]*(n+1) for _ in range(m+1)]
+    for i in range(1, m+1):
+        for j in range(1, n+1):
+            if a[i-1] == b[j-1]:
+                dp[i][j] = dp[i-1][j-1] + 1
+            else:
+                dp[i][j] = max(dp[i-1][j],
+                               dp[i][j-1])
+    return dp[m][n]</code></pre>
+    </div>
+    <div>
+      <h3>Recovering the LCS string</h3>
+<pre><code class="python">def recover_lcs(a, b, dp):
+    i, j = len(a), len(b)
+    result = []
+    while i > 0 and j > 0:
+        if a[i-1] == b[j-1]:
+            result.append(a[i-1])
+            i -= 1; j -= 1
+        elif dp[i-1][j] > dp[i][j-1]:
+            i -= 1
+        else:
+            j -= 1
+    return ''.join(reversed(result))</code></pre>
+      <h3 style="margin-top:.3em">Example</h3>
+      <table>
+        <tr><th>String a</th><td colspan="6"><code>ABCBDAB</code></td></tr>
+        <tr><th>String b</th><td colspan="6"><code>BDCAB</code></td></tr>
+        <tr><th>LCS</th><td colspan="6"><code>BCAB</code> (length 4)</td></tr>
+      </table>
+      <div class="card green" style="margin-top:.4em">
+        <p><strong style="color:var(--green)">Applications:</strong> diff utilities, version control, DNA sequence alignment, plagiarism detection.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 10 — 2D DP: Matrix Chain Multiplication
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">10</span>
+    <h2>2D DP: Matrix Chain Multiplication</h2>
+  </div>
+  <div class="cols cols-6040">
+    <div>
+      <p>Given matrices <code>A<sub>1</sub>...A<sub>n</sub></code> with dimensions <code>p[0]×p[1], p[1]×p[2], ..., p[n-1]×p[n]</code>, find the parenthesisation that minimises total scalar multiplications.</p>
+      <h3>Recurrence</h3>
+<pre><code class="python"># State: dp[i][j] = min cost to multiply A_i..A_j
+# Recurrence:
+dp[i][j] = min over k in [i, j):
+    dp[i][k] + dp[k+1][j] + p[i-1]*p[k]*p[j]
+
+# Base: dp[i][i] = 0 (single matrix, no cost)</code></pre>
+      <h3 style="margin-top:.3em">Solution</h3>
+<pre><code class="python">def matrix_chain(p):
+    n = len(p) - 1
+    dp = [[0]*n for _ in range(n)]
+    for length in range(2, n + 1):
+        for i in range(n - length + 1):
+            j = i + length - 1
+            dp[i][j] = float('inf')
+            for k in range(i, j):
+                cost = (dp[i][k] + dp[k+1][j]
+                        + p[i]*p[k+1]*p[j+1])
+                dp[i][j] = min(dp[i][j], cost)
+    return dp[0][n-1]</code></pre>
+    </div>
+    <div>
+      <h3>Example: p = [10, 30, 5, 60]</h3>
+      <p>Matrices: A<sub>1</sub>(10×30), A<sub>2</sub>(30×5), A<sub>3</sub>(5×60)</p>
+      <table>
+        <tr><th>Parenthesisation</th><th>Cost</th></tr>
+        <tr><td><code>(A<sub>1</sub>·A<sub>2</sub>)·A<sub>3</sub></code></td><td>10·30·5 + 10·5·60 = <strong>4500</strong></td></tr>
+        <tr><td><code>A<sub>1</sub>·(A<sub>2</sub>·A<sub>3</sub>)</code></td><td>30·5·60 + 10·30·60 = <strong>27000</strong></td></tr>
+      </table>
+      <div class="card amber" style="margin-top:.5em">
+        <p><strong style="color:var(--amber)">6× difference!</strong> The wrong parenthesisation can be catastrophically expensive. For n matrices, there are <code>C(n-1)</code> Catalan-number ways to parenthesise.</p>
+      </div>
+      <div class="card blue" style="margin-top:.3em">
+        <p><strong style="color:var(--blue)">Complexity:</strong> Time <code>O(n<sup>3</sup>)</code>, Space <code>O(n<sup>2</sup>)</code>. This is a classic interval DP — iterate by increasing interval length.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 11 — Knapsack Problems
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">11</span>
+    <h2>Knapsack Problems</h2>
+  </div>
+  <div class="cols cols-3">
+    <div class="card amber">
+      <h3>0/1 Knapsack</h3>
+      <p>Each item can be taken at most once.</p>
+<pre><code class="python"># dp[i][w] = max value using
+# items 0..i with capacity w
+
+if w[i] <= j:
+  dp[i][j] = max(
+    dp[i-1][j],          # skip
+    dp[i-1][j-w[i]] + v[i]  # take
+  )
+
+# Time: O(nW), Space: O(nW) → O(W)</code></pre>
+      <p style="margin-top:.3em; color:var(--muted); font-size:.6em">NP-hard — pseudo-polynomial in W</p>
+    </div>
+    <div class="card green">
+      <h3>Unbounded Knapsack</h3>
+      <p>Each item has unlimited supply.</p>
+<pre><code class="python"># dp[w] = max value with capacity w
+
+for w in range(1, W + 1):
+  for i in range(n):
+    if wt[i] <= w:
+      dp[w] = max(dp[w],
+        dp[w - wt[i]] + val[i])
+
+# Time: O(nW), Space: O(W)</code></pre>
+      <p style="margin-top:.3em; color:var(--muted); font-size:.6em">Coin change is a variant of this</p>
+    </div>
+    <div class="card purple">
+      <h3>Fractional Knapsack</h3>
+      <p>Items can be divided — take any fraction.</p>
+<pre><code class="python"># Greedy by value/weight ratio
+items.sort(
+    key=lambda x: x.val/x.wt,
+    reverse=True)
+
+for item in items:
+    if capacity >= item.wt:
+        take whole item
+    else:
+        take fraction
+        break
+
+# Time: O(n log n), Space: O(1)</code></pre>
+      <p style="margin-top:.3em; color:var(--muted); font-size:.6em">Greedy works — no DP needed</p>
+    </div>
+  </div>
+  <div class="card blue" style="margin-top:.5em">
+    <p><strong style="color:var(--blue)">Key distinction:</strong> fractional knapsack has the greedy-choice property. 0/1 and unbounded do not — you must consider all combinations via DP. The 0/1 variant's 1D space optimisation requires iterating capacity <em>right to left</em> to avoid using an item twice.</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 12 — DP on Strings
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">12</span>
+    <h2>DP on Strings</h2>
+  </div>
+  <p>Strings are a rich domain for DP. The state is typically indices into one or two strings.</p>
+  <div class="cols cols-2" style="margin-top:.3em">
+    <div>
+      <h3>Longest Palindromic Subsequence</h3>
+<pre><code class="python"># dp[i][j] = LPS length of s[i..j]
+if s[i] == s[j]:
+    dp[i][j] = dp[i+1][j-1] + 2
+else:
+    dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+
+# Iterate by increasing length
+# Time: O(n^2), Space: O(n^2) → O(n)</code></pre>
+      <h3 style="margin-top:.4em">Palindrome Partitioning</h3>
+<pre><code class="python"># dp[i] = min cuts for s[0..i] to be
+#         all palindromes
+dp[i] = min(dp[j-1] + 1)
+        for j in [0..i] where s[j..i]
+        is a palindrome
+
+# Pre-compute is_pal[i][j] with DP
+# Time: O(n^2), Space: O(n^2)</code></pre>
+    </div>
+    <div>
+      <h3>Distinct Subsequences</h3>
+      <p>Count the number of distinct subsequences of <code>s</code> that equal <code>t</code>.</p>
+<pre><code class="python"># dp[i][j] = ways to form t[0..j-1]
+#            from s[0..i-1]
+if s[i-1] == t[j-1]:
+    dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
+else:
+    dp[i][j] = dp[i-1][j]
+
+# Time: O(mn), Space: O(mn) → O(n)</code></pre>
+      <h3 style="margin-top:.4em">Regular Expression Matching</h3>
+<pre><code class="python"># dp[i][j] = does s[0..i-1] match p[0..j-1]?
+# Handle '.', '*' with careful transitions
+# Time: O(mn), Space: O(mn)</code></pre>
+      <div class="card amber" style="margin-top:.3em">
+        <p><strong style="color:var(--amber)">Pattern:</strong> string DP almost always uses <code>dp[i][j]</code> indexed by positions in one or two strings. The transition considers match/mismatch at the current character.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 13 — DP on Trees
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">13</span>
+    <h2>DP on Trees</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <p>Tree DP computes values at each node based on its children, via post-order DFS. The state is typically <code>dp[node]</code> or <code>dp[node][choice]</code>.</p>
+      <h3>Maximum Independent Set</h3>
+      <p>Select nodes with maximum total weight such that no two adjacent nodes are selected.</p>
+<pre><code class="python"># dp[v][0] = max if v is NOT selected
+# dp[v][1] = max if v IS selected
+
+dp[v][0] = sum(max(dp[c][0], dp[c][1])
+               for c in children(v))
+
+dp[v][1] = weight[v] +
+           sum(dp[c][0]
+               for c in children(v))
+
+# Answer: max(dp[root][0], dp[root][1])</code></pre>
+    </div>
+    <div>
+      <h3>Tree Diameter</h3>
+<pre><code class="python"># dp[v] = longest path starting at v
+#         going downward
+dp[v] = max(dp[c] + 1 for c in children(v))
+
+# At each node, diameter candidate =
+# sum of two longest downward paths
+diameter = max(top1 + top2)
+           across all nodes</code></pre>
+      <h3 style="margin-top:.4em">Rerooting Technique</h3>
+      <div class="card green">
+        <p>Some tree DP problems ask for the answer rooted at <em>every</em> node. Naive approach: run DFS from each node — <code>O(n<sup>2</sup>)</code>.</p>
+        <p style="margin-top:.3em"><strong style="color:var(--green)">Rerooting:</strong> compute DP rooted at node 1, then "shift the root" to each adjacent node in O(1) using precomputed values. Total: <code>O(n)</code>.</p>
+      </div>
+      <div class="card purple" style="margin-top:.3em">
+        <p><strong style="color:var(--purple)">Key insight:</strong> tree DP works because trees have no cycles — each subtree is an independent subproblem. Process leaves first, work upward.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 14 — Bitmask DP
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">14</span>
+    <h2>Bitmask DP</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <p>When the state involves a subset of n elements (n ≤ 20–25), represent the subset as a bitmask integer. State: <code>dp[mask]</code> or <code>dp[mask][i]</code>.</p>
+      <h3>Travelling Salesman Problem (TSP)</h3>
+<pre><code class="python"># dp[mask][i] = min cost to visit cities in
+# 'mask' ending at city i
+
+# Base: dp[1 << start][start] = 0
+
+for mask in range(1, 1 << n):
+    for i in range(n):
+        if not (mask & (1 << i)): continue
+        for j in range(n):
+            if mask & (1 << j): continue
+            new_mask = mask | (1 << j)
+            dp[new_mask][j] = min(
+                dp[new_mask][j],
+                dp[mask][i] + dist[i][j]
+            )
+
+# Answer: min(dp[(1<<n)-1][i] + dist[i][start])
+# Time: O(2^n * n^2), Space: O(2^n * n)</code></pre>
+    </div>
+    <div>
+      <h3>Bit manipulation essentials</h3>
+      <table>
+        <tr><th>Operation</th><th>Code</th></tr>
+        <tr><td>Set bit i</td><td><code>mask | (1 &lt;&lt; i)</code></td></tr>
+        <tr><td>Clear bit i</td><td><code>mask & ~(1 &lt;&lt; i)</code></td></tr>
+        <tr><td>Check bit i</td><td><code>mask & (1 &lt;&lt; i)</code></td></tr>
+        <tr><td>Toggle bit i</td><td><code>mask ^ (1 &lt;&lt; i)</code></td></tr>
+        <tr><td>Count set bits</td><td><code>bin(mask).count('1')</code></td></tr>
+        <tr><td>Lowest set bit</td><td><code>mask & (-mask)</code></td></tr>
+        <tr><td>Iterate subsets of mask</td><td><code>sub = mask; while sub: ... sub = (sub-1) & mask</code></td></tr>
+      </table>
+      <h3 style="margin-top:.4em">Other bitmask DP problems</h3>
+      <div class="card amber">
+        <ul>
+          <li><strong>Assignment problem</strong> — assign n workers to n jobs minimising cost</li>
+          <li><strong>Hamiltonian path</strong> — visit all vertices exactly once</li>
+          <li><strong>Subset sum with element tracking</strong></li>
+          <li><strong>Counting Steiner trees</strong></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 15 — Interval DP
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">15</span>
+    <h2>Interval DP</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <p>Interval DP solves problems where the state is a contiguous range <code>[i, j]</code> and the answer for a range depends on splitting it into smaller ranges.</p>
+      <h3>Pattern</h3>
+<pre><code class="python"># Iterate by interval length
+for length in range(2, n + 1):
+    for i in range(n - length + 1):
+        j = i + length - 1
+        for k in range(i, j):  # split point
+            dp[i][j] = combine(
+                dp[i][k], dp[k+1][j], cost(i,k,j)
+            )</code></pre>
+      <h3 style="margin-top:.3em">Burst Balloons</h3>
+<pre><code class="python"># dp[i][j] = max coins from bursting
+#            balloons i..j
+dp[i][j] = max over k in [i..j]:
+    dp[i][k-1] + dp[k+1][j]
+    + nums[i-1] * nums[k] * nums[j+1]
+
+# Key trick: k is the LAST balloon burst
+# in the range, not the first</code></pre>
+    </div>
+    <div>
+      <h3>Optimal BST</h3>
+      <p>Given keys with search frequencies, build a BST minimising expected search cost.</p>
+<pre><code class="python"># dp[i][j] = min cost BST for keys i..j
+dp[i][j] = min over r in [i..j]:
+    dp[i][r-1] + dp[r+1][j] + sum(freq[i..j])
+
+# Time: O(n^3), improved to O(n^2)
+# with Knuth's optimisation</code></pre>
+      <div class="card green" style="margin-top:.4em">
+        <p><strong style="color:var(--green)">Classic interval DP problems:</strong></p>
+        <ul>
+          <li>Matrix chain multiplication</li>
+          <li>Minimum cost polygon triangulation</li>
+          <li>Palindrome partitioning</li>
+          <li>Burst balloons</li>
+          <li>Optimal BST / Knuth's optimisation</li>
+          <li>Stone game / merging stones</li>
+        </ul>
+      </div>
+      <div class="card blue" style="margin-top:.3em">
+        <p><strong style="color:var(--blue)">Complexity:</strong> typically <code>O(n<sup>3</sup>)</code> time, <code>O(n<sup>2</sup>)</code> space. Some can be optimised to <code>O(n<sup>2</sup>)</code> with Knuth's or divide-and-conquer optimisation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 16 — Space Optimisation Techniques
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">16</span>
+    <h2>Space Optimisation Techniques</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Rolling array (two rows)</h3>
+      <p>When <code>dp[i]</code> depends only on <code>dp[i-1]</code>, keep just two rows and alternate.</p>
+<pre><code class="python"># Edit distance: O(mn) → O(n) space
+def edit_distance(a, b):
+    m, n = len(a), len(b)
+    prev = list(range(n + 1))
+    curr = [0] * (n + 1)
+    for i in range(1, m + 1):
+        curr[0] = i
+        for j in range(1, n + 1):
+            if a[i-1] == b[j-1]:
+                curr[j] = prev[j-1]
+            else:
+                curr[j] = 1 + min(prev[j],
+                    curr[j-1], prev[j-1])
+        prev, curr = curr, prev
+    return prev[n]</code></pre>
+      <h3 style="margin-top:.3em">Single variable (Fibonacci)</h3>
+<pre><code class="python"># When only prev and prev-prev needed:
+prev2, prev1 = base_val, base_val
+for ...:
+    prev2, prev1 = prev1, f(prev1, prev2)</code></pre>
+    </div>
+    <div>
+      <h3>In-place update (1D knapsack)</h3>
+      <p>For 0/1 knapsack, iterate capacity <strong>right to left</strong> to avoid counting an item twice.</p>
+<pre><code class="python"># 0/1 knapsack in O(W) space
+dp = [0] * (W + 1)
+for i in range(n):
+    for w in range(W, wt[i] - 1, -1):
+        dp[w] = max(dp[w],
+                    dp[w - wt[i]] + val[i])</code></pre>
+      <p>For unbounded knapsack, iterate <strong>left to right</strong> — reusing the same item is allowed.</p>
+      <h3 style="margin-top:.3em">Summary of reductions</h3>
+      <table>
+        <tr><th>Problem</th><th>Full</th><th>Optimised</th></tr>
+        <tr><td>Fibonacci</td><td>O(n)</td><td>O(1)</td></tr>
+        <tr><td>LCS / Edit dist</td><td>O(mn)</td><td>O(min(m,n))</td></tr>
+        <tr><td>0/1 Knapsack</td><td>O(nW)</td><td>O(W)</td></tr>
+        <tr><td>Grid paths</td><td>O(mn)</td><td>O(n)</td></tr>
+        <tr><td>LIS</td><td>O(n<sup>2</sup>)</td><td>O(n)</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 17 — DP Optimisation Techniques
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">17</span>
+    <h2>DP Optimisation Techniques</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <div class="card amber">
+        <h3>Knuth's Optimisation</h3>
+        <p>For interval DP where the optimal split point <code>opt[i][j]</code> satisfies <code>opt[i][j-1] ≤ opt[i][j] ≤ opt[i+1][j]</code>, reduce from O(n<sup>3</sup>) to O(n<sup>2</sup>).</p>
+        <p style="margin-top:.2em; color:var(--muted); font-size:.6em">Applies to: optimal BST, certain stone-merging variants</p>
+      </div>
+      <div class="card green" style="margin-top:.3em">
+        <h3>Divide & Conquer Optimisation</h3>
+        <p>When <code>dp[i][j] = min over k (dp[i-1][k] + C(k,j))</code> and the optimal k increases with j, use D&C to reduce one layer from O(n<sup>2</sup>) to O(n log n).</p>
+        <p style="margin-top:.2em; color:var(--muted); font-size:.6em">Applies to: many partition-into-k-groups problems</p>
+      </div>
+      <div class="card purple" style="margin-top:.3em">
+        <h3>Convex Hull Trick</h3>
+        <p>When the recurrence has the form <code>dp[i] = min(dp[j] + b[j]*a[i])</code> and slopes <code>b[j]</code> are monotone, maintain a convex hull of lines. Query is O(1) amortised.</p>
+        <p style="margin-top:.2em; color:var(--muted); font-size:.6em">Li Chao tree generalises to arbitrary slope order</p>
+      </div>
+    </div>
+    <div>
+      <div class="card blue">
+        <h3>Monotone Queue / Deque</h3>
+        <p>For sliding-window minimum/maximum in DP transitions. Reduces per-transition cost from O(k) to O(1) amortised.</p>
+<pre><code class="python"># dp[i] = min(dp[j] + cost)
+# for j in [i-k, i-1]
+# Use a deque maintaining indices
+# in increasing dp order</code></pre>
+      </div>
+      <div class="card red" style="margin-top:.3em">
+        <h3>SOS DP (Sum over Subsets)</h3>
+        <p>Compute for every bitmask the sum over all its submasks. Naive is O(3<sup>n</sup>); SOS DP does it in O(n · 2<sup>n</sup>).</p>
+<pre><code class="python">for bit in range(n):
+    for mask in range(1 << n):
+        if mask & (1 << bit):
+            dp[mask] += dp[mask ^ (1 << bit)]</code></pre>
+      </div>
+      <div class="card amber" style="margin-top:.3em">
+        <p><strong style="color:var(--amber)">When to use:</strong> these optimisations matter in competitive programming and at scale. In interviews, the standard O(n<sup>2</sup>) or O(n<sup>3</sup>) DP is almost always sufficient.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 18 — Identifying DP Problems
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">18</span>
+    <h2>Identifying DP Problems</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Signal phrases in problem statements</h3>
+      <table>
+        <tr><th>Phrase</th><th>Likely DP type</th></tr>
+        <tr><td>"minimum / maximum"</td><td>Optimisation DP</td></tr>
+        <tr><td>"count the number of ways"</td><td>Counting DP</td></tr>
+        <tr><td>"is it possible to…"</td><td>Boolean DP (feasibility)</td></tr>
+        <tr><td>"longest / shortest"</td><td>Sequence DP</td></tr>
+        <tr><td>"partition into groups"</td><td>Interval / subset DP</td></tr>
+        <tr><td>"subsequence"</td><td>1D or 2D string DP</td></tr>
+        <tr><td>"grid / matrix traversal"</td><td>2D grid DP</td></tr>
+        <tr><td>"subset / bitmask"</td><td>Bitmask DP (n ≤ 20)</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>DP vs other paradigms</h3>
+      <table>
+        <tr><th>Paradigm</th><th>When to use</th></tr>
+        <tr><td><strong>Greedy</strong></td><td>Greedy-choice property holds; locally optimal = globally optimal</td></tr>
+        <tr><td><strong>D&C</strong></td><td>Subproblems are independent (no overlap)</td></tr>
+        <tr><td><strong>DP</strong></td><td>Overlapping subproblems + optimal substructure</td></tr>
+        <tr><td><strong>Backtracking</strong></td><td>Need all solutions, not just optimal; pruning helps</td></tr>
+      </table>
+      <div class="card green" style="margin-top:.4em">
+        <h3>Decision checklist</h3>
+        <ul>
+          <li>Can I express the answer as a function of smaller inputs?</li>
+          <li>Do subproblems repeat? (Draw the recursion tree)</li>
+          <li>Does the state space fit in memory?</li>
+          <li>Can I define a clear recurrence relation?</li>
+          <li>Is the iteration order well-defined?</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 19 — Common Pitfalls & Debugging
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">19</span>
+    <h2>Common Pitfalls & Debugging</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Pitfalls</h3>
+      <div class="card red">
+        <h3>Wrong base case</h3>
+        <p>Off-by-one errors in base cases propagate through the entire table. Always verify: what happens when the input is empty? When it has one element?</p>
+      </div>
+      <div class="card red" style="margin-top:.3em">
+        <h3>Wrong iteration order</h3>
+        <p>If <code>dp[i]</code> depends on <code>dp[i-1]</code> and <code>dp[i+1]</code>, a single left-to-right pass won't work. Draw the dependency graph.</p>
+      </div>
+      <div class="card red" style="margin-top:.3em">
+        <h3>State not fully captured</h3>
+        <p>Missing a dimension in the state leads to incorrect transitions. Example: forgetting to track "last element chosen" in problems requiring it.</p>
+      </div>
+      <div class="card red" style="margin-top:.3em">
+        <h3>Integer overflow</h3>
+        <p>Counting problems can produce astronomically large values. Use modular arithmetic (<code>% 10<sup>9</sup>+7</code>) or big integers as needed.</p>
+      </div>
+    </div>
+    <div>
+      <h3>Debugging strategies</h3>
+      <div class="card green">
+        <h3>Print the DP table</h3>
+        <p>For small inputs, print the entire table and manually verify each cell against the recurrence.</p>
+      </div>
+      <div class="card green" style="margin-top:.3em">
+        <h3>Start with brute force</h3>
+        <p>Write the naive recursive solution first. Verify it works. Then add memoization. This separates correctness from optimisation.</p>
+      </div>
+      <div class="card green" style="margin-top:.3em">
+        <h3>Test edge cases</h3>
+        <ul>
+          <li>Empty input</li>
+          <li>Single element</li>
+          <li>All elements identical</li>
+          <li>Already sorted / reverse sorted</li>
+          <li>Maximum constraints</li>
+        </ul>
+      </div>
+      <div class="card green" style="margin-top:.3em">
+        <h3>Stress test</h3>
+        <p>Generate random small inputs, compare brute-force vs DP output. If they diverge, you have a minimal failing case to debug.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════════════
+  SLIDE 20 — Summary & Further Reading
+══════════════════════════════════════════════════════════════════ -->
+<section data-background-color="#0a0a0f">
+  <div class="slide-hdr">
+    <span class="tag">20</span>
+    <h2>Summary & Further Reading</h2>
+  </div>
+  <div class="cols cols-2">
+    <div>
+      <h3>Key takeaways</h3>
+      <ul>
+        <li>DP applies when a problem has <strong>optimal substructure</strong> and <strong>overlapping subproblems</strong></li>
+        <li>Top-down (memoization) and bottom-up (tabulation) are equivalent in power — choose based on the problem's structure</li>
+        <li>The five-step recipe — state, recurrence, base case, iteration order, answer extraction — works universally</li>
+        <li>1D, 2D, interval, tree, bitmask, and string DP cover the vast majority of problems</li>
+        <li>Space optimisation (rolling arrays, in-place updates) often reduces memory by an order of magnitude</li>
+        <li>Always start with brute-force recursion, verify correctness, then optimise with memoization or tabulation</li>
+        <li>Practice pattern recognition — most DP problems map to a small set of well-known templates</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Recommended reading</h3>
+      <table>
+        <tr><th>Source</th><th>Description</th></tr>
+        <tr><td><strong>CLRS</strong></td><td><em>Introduction to Algorithms</em> — chapters 14–15 cover DP foundations rigorously</td></tr>
+        <tr><td><strong>Kleinberg & Tardos</strong></td><td><em>Algorithm Design</em> — excellent intuition-building DP chapter</td></tr>
+        <tr><td><strong>Competitive Programmer's Handbook</strong></td><td>Laaksonen — free PDF, concise DP coverage with contest examples</td></tr>
+        <tr><td><strong>LeetCode</strong></td><td><a href="https://leetcode.com/tag/dynamic-programming/" style="color:var(--blue)">leetcode.com/tag/dynamic-programming</a> — 500+ problems sorted by difficulty</td></tr>
+        <tr><td><strong>Codeforces EDU</strong></td><td><a href="https://codeforces.com/edu/courses" style="color:var(--blue)">DP section</a> — structured problems with editorials</td></tr>
+        <tr><td><strong>MIT 6.006</strong></td><td>Erik Demaine's lectures on DP — free on YouTube, exceptional clarity</td></tr>
+      </table>
+      <div class="card amber" style="margin-top:.4em">
+        <p><strong style="color:var(--amber)">Practice path:</strong> Fibonacci → climbing stairs → coin change → LCS → edit distance → knapsack → LIS → interval DP → tree DP → bitmask DP. Master each level before advancing.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /slides -->
+</div><!-- /reveal -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/reveal.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.6.1/plugin/highlight/highlight.min.js"></script>
+<script>
+Reveal.initialize({
+  hash: true,
+  slideNumber: 'c/t',
+  transition: 'fade',
+  transitionSpeed: 'fast',
+  controls: true,
+  progress: true,
+  center: false,
+  width: 1100,
+  height: 900,
+  margin: 0.01,
+  plugins: [RevealHighlight],
+  highlight: { theme: 'monokai' }
+});
+</script>
+<script>
+(function(){
+  var h = Reveal.getConfig().height || 900;
+  var m = Reveal.getConfig().margin || 0.02;
+  var maxH = Math.floor(h * (1 - 2 * m)) + 'px';
+  function fixSlides(){
+    document.querySelectorAll('.reveal .slides>section,.reveal .slides>section>section').forEach(function(s){
+      s.style.display = 'block';
+      s.style.maxHeight = maxH;
+    });
+  }
+  Reveal.on('ready', fixSlides);
+  Reveal.on('slidechanged', fixSlides);
+})();
+</script>
+</body>
+</html>

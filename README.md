@@ -48,7 +48,7 @@ An interactive slide deck covering optimal substructure, memoization, tabulation
 
 ## Technology
 
-[Reveal.js 4.6](https://revealjs.com) · [highlight.js](https://highlightjs.org) (Monokai) · Playfair Display + DM Sans + JetBrains Mono
+[Reveal.js 4.6](https://revealjs.com) · [highlight.js](https://highlightjs.org) (Monokai) · Schibsted Grotesk + Azeret Mono
 
 Single self-contained `index.html` — no build step, no npm.
 
